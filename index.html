@@ -108,8 +108,7 @@
       font-size: 2em;
     }
   }
-  </style>
-
+</style>
 </head>
 
 <body>
@@ -131,7 +130,7 @@
     <div class="viento" id="viento">Cargando viento...</div>
   </div>
 
-  <script>
+<script>
   // -------------------------------------------
   // Lectura del estado desde Netlify Function
   // -------------------------------------------
@@ -240,6 +239,7 @@
 
   // 🔄 Convierte grados a dirección cardinal
   function obtenerDireccionCardinal(grados) {
+    if (grados === "" || grados === undefined) return "---";
     for (let dir of direcciones) {
       if (dir.desde > dir.hasta) {
         // Rango que cruza el 0° (ej. N)
@@ -307,41 +307,39 @@
         `Temp: ${data.main.temp.toFixed(1)} °C.
         Sensación: ${data.main.feels_like.toFixed(1)} °C`;
 
-      // Guardamos datos de viento para alternar
-      vientoVelocidad = (data.wind.speed * 3.6).toFixed(2); // km/h
+      // Guardamos datos de viento
+      vientoVelocidad = (data.wind.speed * 3.6).toFixed(1); // km/h con un decimal
       vientoDireccion = data.wind.deg;
+
+  //Cargamos el viento inmediatamente ahora que los datos ya existen
+      alternarViento();
 
     } catch (e) {
       document.getElementById("temp").textContent = "Error al cargar";
       document.getElementById("textoClima").textContent = "Error al cargar clima";
+      document.getElementById("viento").textContent = "Error al cargar viento";
     }
   }
 
-  // 🌬️ Alterna entre velocidad y dirección del viento
+  // 🌬️ Muestra la velocidad y dirección del viento
   function alternarViento() {
-    const direccionCardinal = obtenerDireccionCardinal(vientoDireccion);
-    document.getElementById("viento").textContent =
-      `Viento: (${direccionCardinal}) a ${vientoVelocidad} km/h`;
+    if (vientoVelocidad !== "") {
+      const direccionCardinal = obtenerDireccionCardinal(vientoDireccion);
+      document.getElementById("viento").textContent =
+        `Viento: (${direccionCardinal}) a ${vientoVelocidad} km/h`;
+    }
   }
 
   // 🧠 Inicialización
   updateFecha();
   updateClocks();
-  updateTemp();
-  alternarViento(); // primera visualización
+  updateTemp(); // Llama internamente a alternarViento() al finalizar el fetch
 
   // ⏱️ Timers
   setInterval(updateClocks, 1000);             // reloj cada segundo
   setInterval(updateTemp, 600000);             // clima cada 10 minutos
   setInterval(verificarCambioDeDia, 600000);   // fecha cada 10 minutos
-  setInterval(alternarViento, 300000);         // viento cada 5 minutos
-  </script>
+  setInterval(alternarViento, 30000);          // actualiza render de viento cada 30 segundos
+</script>
 </body>
 </html>
-
-
-
-
-
-
-
